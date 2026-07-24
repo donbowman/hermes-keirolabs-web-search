@@ -1,0 +1,2 @@
+[hermes_agent.plugins]
+hermes-keirolabs-web-search = hermes_keirolabs_web_search

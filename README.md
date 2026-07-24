@@ -1,0 +1,248 @@
+# Hermes Keiros Labs Web Search
+
+Give your Hermes agent live access to the web — powered by the Keiros Labs search API.
+
+When your agent needs to look something up, this plugin answers with grounded, sourced results instead of stale training data. It works for both quick searches ("what's the latest Python release?") and deep page extraction ("summarize this RFC for me").
+
+## Why use this plugin?
+
+**Real answers from the live web.** Your agent's training data ends months ago. This plugin connects it to Keiros Labs so it can answer questions about today's world — breaking news, current docs, recent releases, real-time events.
+
+**Cost-efficient.** Keiros Labs offers web scraping at roughly 80% less than competing providers. All cached requests are 50% off. The free tier is generous enough to get started without a credit card.
+
+**Multiple API modes.** Choose the endpoint that fits your budget and latency needs — `lite` (default), `fast`, `search`, `answer`, `research`, or `extract`. Swap between them with a single line in your config.
+
+**Search and extract in one.** Some providers only search. This one does both — find information and pull full page content — so you don't need two plugins wired together.
+
+**Zero maintenance.** The provider self-registers with Hermes at startup. There is nothing to configure beyond pasting your API key.
+
+## What you'll need
+
+- **Hermes agent** installed and working (any platform — CLI, desktop, Telegram, Discord, etc.)
+- **A Keiros Labs API key** (free tier available)
+
+That's it. No other accounts, no credit card, no setup scripts.
+
+## Getting a Keiros Labs API key
+
+1. Go to **[Keiros Labs](https://platform.keirolabs.cloud)** in your browser
+2. Sign up for a free account or log in if you already have one
+3. Navigate to your dashboard or API keys section
+4. Copy the key that appears
+
+The free tier gives you a generous number of queries. You will be notified if you approach the limit — upgrade to a paid plan only if you need more.
+
+## Installation
+
+### One command
+
+From inside your Hermes environment:
+
+```bash
+pip install hermes-keiroslabs-web-search
+```
+
+### Or from source
+
+```bash
+git clone https://github.com/your-username/hermes-keiroslabs-web-search.git
+cd hermes-keiroslabs-web-search
+pip install .
+```
+
+### Or by copying into Hermes directly
+
+```bash
+mkdir -p ~/.hermes/plugins/web/keiroslabs
+cp hermes_keiroslabs_web_search/* ~/.hermes/plugins/web/keiroslabs/
+```
+
+The pip install method is recommended — it keeps the plugin up to date and discoverable.
+
+## Configuration
+
+Three short steps. Everything happens in two files inside `~/.hermes/`.
+
+### Step 1 — Add your API key
+
+Open `~/.hermes/.env` in any text editor and add one line:
+
+```bash
+KEIROSLABS_API_KEY=your-api-key-here
+```
+
+Make sure there are no extra spaces or quotes around the value.
+
+### Step 2 — Enable the plugin
+
+Open `~/.hermes/config.yaml` and add `hermes-keiroslabs-web-search` to your enabled plugins:
+
+```yaml
+plugins:
+  enabled:
+    - hermes-keiroslabs-web-search
+```
+
+If you already have other plugins enabled, just add this one to the list. If you have never enabled a plugin before, the `plugins` section might not exist yet — create it at the top level of the file and add both keys exactly as shown.
+
+### Step 3 — Tell Hermes to use it
+
+In the same `config.yaml` file, under the `web` section, set the backend:
+
+```yaml
+web:
+  backend: keiroslabs
+```
+
+The full `config.yaml` will look something like this (your file may have other sections — that's fine):
+
+```yaml
+plugins:
+  enabled:
+    - hermes-keiroslabs-web-search
+
+web:
+  backend: keiroslabs
+```
+
+### Step 4 — Restart Hermes
+
+Quit and restart your Hermes agent. On the next question that needs web access, the agent will use Keiros Labs.
+
+## Verifying it works
+
+Ask your agent something that requires live web access:
+
+```
+> what is the latest stable version of Python?
+
+> who won the most recent Formula 1 race?
+
+> summarize the top story on Hacker News today
+```
+
+If the agent returns current, factual answers, the plugin is working.
+
+You can also check with the Hermes tools picker:
+
+```bash
+hermes tools
+```
+
+Navigate to **Web Search** — you should see "Keiros Labs" listed with a green checkmark and "free tier available" badge.
+
+## How it works
+
+When your agent calls `web_search("some query")`, the plugin sends the query to the Keiros Labs API and returns:
+
+- A **generated answer** — Keiros Labs's summary of what it found, backed by the search results
+- **Supporting sources** — links to the actual pages so the agent (and you) can verify claims
+
+When your agent calls `web_extract(url)`, the plugin sends the URL to the Keiros Labs API for full-page content extraction.
+
+Under the hood, this uses `httpx` for HTTP requests. It is installed automatically as a dependency — you never need to think about it. No SDK should be installed separately.
+
+## Advanced configuration
+
+### Choosing an API endpoint
+
+The default endpoint is `lite` — fast, cheap, and well-suited to most searches. You can override it in `config.yaml`:
+
+```yaml
+web:
+  backend: keiroslabs
+  keiroslabs_endpoint: fast
+```
+
+Available endpoints:
+
+| Endpoint   | Path           | Description                          |
+|-----------|----------------|--------------------------------------|
+| `lite`    | `/v2/lite`     | Fast lightweight search (default)    |
+| `fast`    | `/v2/fast`     | Quick search with minimal latency    |
+| `search`  | `/search`      | Standard search with full results    |
+| `answer`  | `/answer`      | Detailed answer generation           |
+| `research`| `/research`    | In-depth research with deep context  |
+| `extract` | `/web-crawler` | Content extraction from URLs         |
+| `batch`   | `/v2/batch`    | Batched queries for multiple searches|
+
+### Using a custom API base URL
+
+If you are using a self-hosted instance or a proxy, you can override the base URL:
+
+```yaml
+web:
+  backend: keiroslabs
+  keiroslabs_base_url: https://your-proxy.example.com/api
+```
+
+The default is `https://kierolabs.space/api`.
+
+### Per-capability routing
+
+You can use Keiros Labs for search only (or extract only) while routing the other capability to a different provider:
+
+```yaml
+web:
+  search_backend: keiroslabs     # Keiros Labs handles web_search
+  extract_backend: firecrawl     # Firecrawl handles web_extract
+```
+
+### Configuring via `hermes tools`
+
+If you prefer the interactive terminal UI:
+
+```bash
+hermes tools
+```
+
+Navigate to **Web Search**, select **Keiros Labs**, and follow the prompts. The picker will ask for your API key and set everything up for you.
+
+## Troubleshooting
+
+### "KEIROSLABS_API_KEY environment variable not set"
+
+The plugin can't find your key. Check that:
+- `~/.hermes/.env` exists and has a line starting with `KEIROSLABS_API_KEY=`
+- There are no extra spaces or quotes around the value
+- You restarted Hermes after adding the key
+
+### "hermes-keiroslabs-web-search is not enabled"
+
+Hermes found the plugin but hasn't been told to activate it. Check that `~/.hermes/config.yaml` contains:
+
+```yaml
+plugins:
+  enabled:
+    - hermes-keiroslabs-web-search
+```
+
+### "Invalid KEIROSLABS_API_KEY" or "access denied"
+
+Your API key may be incorrect or expired. Visit [Keiros Labs](https://platform.keirolabs.cloud), navigate to your dashboard, and verify your key is still active. Generate a new key if needed.
+
+### "Keiros Labs API: out of credits"
+
+You have exhausted your free tier quota or paid plan credits. Visit [Keiros Labs](https://platform.keirolabs.cloud) to upgrade your plan or wait for your quota to reset.
+
+### "Failed to connect to Keiros Labs API"
+
+The Keiros Labs servers may be down, or your network may be blocking the connection. Check:
+- Your internet connection is working
+- You can reach `https://kierolabs.space/api/health` in a browser or with `curl`
+- No firewall or VPN is blocking outbound HTTPS on port 443
+
+### The agent is not using the plugin
+
+Make sure you restarted Hermes after making the configuration changes. Plugin discovery happens at startup.
+
+## Development
+
+```bash
+git clone https://github.com/your-username/hermes-keiroslabs-web-search.git
+cd hermes-keiroslabs-web-search
+pip install -e .
+pytest
+```
+
+Tests use mocks so no API key or network access is needed to run the suite.

@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=75.8.0,<76", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hermes-keirolabs-web-search"
+version = "1.0.0"
+description = "Live web search and content extraction for Hermes agent — powered by KeiroLabs API"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11,<3.15"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "httpx>=0.28.1,<1",
+]
+
+[project.entry-points."hermes_agent.plugins"]
+hermes-keirolabs-web-search = "hermes_keirolabs_web_search"
+
+[tool.setuptools]
+license-files = ["LICENSE"]
+
+[tool.setuptools.packages.find]
+include = ["hermes_keirolabs_web_search*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
