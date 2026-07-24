@@ -17,17 +17,17 @@ from hermes_keirolabs_web_search.tools import (
 
 
 def test_check_available_without_key(monkeypatch):
-    monkeypatch.delenv("KEIROSLABS_API_KEY", raising=False)
+    monkeypatch.delenv("KEIROLABS_API_KEY", raising=False)
     assert not _check_available()
 
 
 def test_check_available_with_key(monkeypatch):
-    monkeypatch.setenv("KEIROSLABS_API_KEY", "test-key")
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
     assert _check_available()
 
 
 def test_handle_lite(monkeypatch):
-    monkeypatch.setenv("KEIROSLABS_API_KEY", "test-key")
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
     mock_data = {"answer": "Lite result", "sources": [], "creditsRemaining": 100}
 
     with patch(
@@ -41,7 +41,7 @@ def test_handle_lite(monkeypatch):
 
 
 def test_handle_fast(monkeypatch):
-    monkeypatch.setenv("KEIROSLABS_API_KEY", "test-key")
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
     mock_data = {"text": "Fast result", "sources": [], "creditsRemaining": 100}
 
     with patch(
@@ -55,7 +55,7 @@ def test_handle_fast(monkeypatch):
 
 
 def test_handle_search_endpoint(monkeypatch):
-    monkeypatch.setenv("KEIROSLABS_API_KEY", "test-key")
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
     mock_data = {
         "data": "Standard search result",
         "sources": [
@@ -76,7 +76,7 @@ def test_handle_search_endpoint(monkeypatch):
 
 
 def test_handle_answer(monkeypatch):
-    monkeypatch.setenv("KEIROSLABS_API_KEY", "test-key")
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
     mock_data = {"answer": "Detailed answer", "sources": [], "creditsRemaining": 10}
 
     with patch(
@@ -90,7 +90,7 @@ def test_handle_answer(monkeypatch):
 
 
 def test_handle_research(monkeypatch):
-    monkeypatch.setenv("KEIROSLABS_API_KEY", "test-key")
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
     mock_data = {"text": "Deep research", "sources": [], "creditsRemaining": 5}
 
     with patch(
@@ -104,7 +104,7 @@ def test_handle_research(monkeypatch):
 
 
 def test_handle_batch(monkeypatch):
-    monkeypatch.setenv("KEIROSLABS_API_KEY", "test-key")
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
     mock_data = {"results": [{"query": "a", "data": "x"}, {"query": "b", "data": "y"}]}
 
     with patch(
@@ -128,7 +128,7 @@ def test_handle_batch_wrong_type():
 
 
 def test_handle_extract(monkeypatch):
-    monkeypatch.setenv("KEIROSLABS_API_KEY", "test-key")
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
     mock_data = {
         "title": "Extracted Page",
         "content": "Full page content here.",
@@ -158,7 +158,7 @@ def test_handle_lite_missing_query():
 
 
 def test_handle_lite_api_error(monkeypatch):
-    monkeypatch.setenv("KEIROSLABS_API_KEY", "test-key")
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
 
     with patch(
         "hermes_keirolabs_web_search.provider.call_keirolabs_api",

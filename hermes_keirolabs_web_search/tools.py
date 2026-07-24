@@ -51,7 +51,7 @@ _BATCH_SCHEMA: Dict[str, Any] = {
 
 
 def _check_available() -> bool:
-    return bool(os.getenv("KEIROSLABS_API_KEY", "").strip())
+    return bool(os.getenv("KEIROLABS_API_KEY", "").strip())
 
 
 def _make_schema(name: str, desc: str, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -213,6 +213,8 @@ def _handle_extract(args: Dict[str, Any]) -> str:
         return json.dumps({"error": str(exc)})
 
     content = data.get("content") or data.get("data") or data.get("text", "")
+    if not content and isinstance(data.get("results"), list) and data["results"]:
+        content = data["results"][0].get("content", "")
     if isinstance(content, dict):
         content = str(content)
 
@@ -250,7 +252,7 @@ def register_tools(ctx) -> None:
             schema=schema,
             handler=lambda args, h=handler, **kw: h(args),
             check_fn=_check_available,
-            requires_env=["KEIROSLABS_API_KEY"],
+            requires_env=["KEIROLABS_API_KEY"],
             description=schema["description"],
         )
     logger.debug("Registered %d KeiroLabs tools", len(_TOOLS))

@@ -68,7 +68,7 @@ Three short steps. Everything happens in two files inside `~/.hermes/`.
 Open `~/.hermes/.env` in any text editor and add one line:
 
 ```bash
-KEIROSLABS_API_KEY=your-api-key-here
+KEIROLABS_API_KEY=your-api-key-here
 ```
 
 Make sure there are no extra spaces or quotes around the value.
@@ -200,10 +200,10 @@ Navigate to **Web Search**, select **Keiros Labs**, and follow the prompts. The 
 
 ## Troubleshooting
 
-### "KEIROSLABS_API_KEY environment variable not set"
+### "KEIROLABS_API_KEY environment variable not set"
 
 The plugin can't find your key. Check that:
-- `~/.hermes/.env` exists and has a line starting with `KEIROSLABS_API_KEY=`
+- `~/.hermes/.env` exists and has a line starting with `KEIROLABS_API_KEY=`
 - There are no extra spaces or quotes around the value
 - You restarted Hermes after adding the key
 
@@ -217,7 +217,7 @@ plugins:
     - hermes-keiroslabs-web-search
 ```
 
-### "Invalid KEIROSLABS_API_KEY" or "access denied"
+### "Invalid KEIROLABS_API_KEY" or "access denied"
 
 Your API key may be incorrect or expired. Visit [Keiros Labs](https://platform.keirolabs.cloud), navigate to your dashboard, and verify your key is still active. Generate a new key if needed.
 

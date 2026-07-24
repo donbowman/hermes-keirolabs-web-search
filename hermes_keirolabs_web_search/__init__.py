@@ -4,7 +4,7 @@ Backed by the KeiroLabs search API using ``httpx``.
 
 Activates when ``web.search_backend: keirolabs``, ``web.extract_backend: keirolabs``,
 or ``web.backend: keirolabs`` is set in ``config.yaml`` and
-``KEIROSLABS_API_KEY`` is configured.
+``KEIROLABS_API_KEY`` is configured.
 """
 
 from __future__ import annotations

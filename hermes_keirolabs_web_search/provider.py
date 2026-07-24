@@ -14,7 +14,7 @@ Config keys this provider responds to::
 
 Env var::
 
-    KEIROSLABS_API_KEY=...
+    KEIROLABS_API_KEY=...
 """
 
 from __future__ import annotations
@@ -35,39 +35,44 @@ logger = logging.getLogger(__name__)
 _KEIROLABS_CLIENT: httpx.Client | None = None
 
 _ENDPOINT_MAP: Dict[str, str] = {
-    "lite": "/v2/lite",
-    "fast": "/v2/fast",
+    "lite": "/v2/search/lite",
+    "fast": "/v2/search/fast",
     "search": "/search",
     "answer": "/answer",
     "research": "/research",
     "extract": "/web-crawler",
-    "batch": "/v2/batch",
+    "batch": "/v2/search/batch",
 }
 
 
 # -- module-level helpers shared with tools.py ---------------------------------
 
 
+def _get_api_key() -> str:
+    return (os.getenv("KEIROLABS_API_KEY") or "").strip()
+
+
 def _get_client() -> httpx.Client:
     """Lazy-create and cache an httpx Client.
 
-    Raises ``ValueError`` when ``KEIROSLABS_API_KEY`` is unset.
+    Raises ``ValueError`` when ``KEIROLABS_API_KEY`` is unset.
     """
     global _KEIROLABS_CLIENT
 
     if _KEIROLABS_CLIENT is not None:
         return _KEIROLABS_CLIENT
 
-    api_key = os.getenv("KEIROSLABS_API_KEY", "").strip()
+    api_key = _get_api_key()
     if not api_key:
         raise ValueError(
-            "KEIROSLABS_API_KEY environment variable not set. "
+            "KEIROLABS_API_KEY environment variable not set. "
             "Get your API key at https://platform.keirolabs.cloud"
         )
 
     _KEIROLABS_CLIENT = httpx.Client(
         timeout=httpx.Timeout(60.0),
         headers={
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
             "User-Agent": "hermes-keirolabs-web-search/1.0.0",
         },
@@ -81,10 +86,6 @@ def _reset_client_for_tests() -> None:
     if _KEIROLABS_CLIENT is not None:
         _KEIROLABS_CLIENT.close()
     _KEIROLABS_CLIENT = None
-
-
-def _get_api_key() -> str:
-    return os.getenv("KEIROSLABS_API_KEY", "").strip()
 
 
 def _get_base_url() -> str:
@@ -139,7 +140,7 @@ def call_keirolabs_api(endpoint: str, payload: Dict[str, Any]) -> Dict[str, Any]
         raise ValueError(f"Failed to connect to KeiroLabs API at {url}")
 
     if resp.status_code == 401:
-        raise ValueError("Invalid KEIROSLABS_API_KEY")
+        raise ValueError("Invalid KEIROLABS_API_KEY")
     if resp.status_code == 402:
         raise ValueError("KeiroLabs API: out of credits")
     if resp.status_code == 403:
@@ -154,7 +155,31 @@ def call_keirolabs_api(endpoint: str, payload: Dict[str, Any]) -> Dict[str, Any]
             f"KeiroLabs API error {resp.status_code}: {resp.text}"
         )
 
-    return resp.json()
+    try:
+        j = resp.json()
+        print("DEBUG: resp.json() succeeded:", type(j))
+        return j
+    except Exception as outer_e:
+        print("DEBUG: resp.json() failed:", outer_e)
+        text = resp.text.strip()
+        import re
+        clean_text = re.sub(r'\\x([0-9a-fA-F]{2})', r'\\u00\1', text)
+        for i, line in enumerate(clean_text.splitlines()):
+            line = line.strip()
+            print(f"DEBUG: line {i} starts with data: {line.startswith('data:')}")
+            if line.startswith("data:"):
+                payload_str = line[5:].strip()
+                print(f"DEBUG: payload_str is: {repr(payload_str[:40])}")
+                if payload_str and payload_str != "[DONE]":
+                    try:
+                        parsed = json.loads(payload_str, strict=False)
+                        print("DEBUG: parsed success!")
+                        if isinstance(parsed, dict):
+                            print("DEBUG: returning parsed dict!")
+                            return parsed
+                    except Exception as inner_e:
+                        print("DEBUG: inner parse failed:", inner_e)
+        return {"data": text}
 
 
 # -- provider class ------------------------------------------------------------
@@ -172,7 +197,7 @@ class KeiroLabsWebSearchProvider(WebSearchProvider):
         return "KeiroLabs"
 
     def is_available(self) -> bool:
-        return bool(os.getenv("KEIROSLABS_API_KEY", "").strip())
+        return bool(_get_api_key())
 
     def supports_search(self) -> bool:
         return True
@@ -276,6 +301,8 @@ class KeiroLabsWebSearchProvider(WebSearchProvider):
                     data = call_keirolabs_api("extract", {"url": url})
 
                     content = data.get("content") or data.get("data") or data.get("text", "")
+                    if not content and isinstance(data.get("results"), list) and data["results"]:
+                        content = data["results"][0].get("content", "")
                     if isinstance(content, dict):
                         content = str(content)
 
@@ -324,11 +351,11 @@ class KeiroLabsWebSearchProvider(WebSearchProvider):
             "tag": (
                 "Web search and content extraction using KeiroLabs API. "
                 "Cost-efficient web scraping with lite/fast/search/answer endpoints. "
-                "Requires KEIROSLABS_API_KEY."
+                "Requires KEIROLABS_API_KEY."
             ),
             "env_vars": [
                 {
-                    "key": "KEIROSLABS_API_KEY",
+                    "key": "KEIROLABS_API_KEY",
                     "prompt": "KeiroLabs API key",
                     "url": "https://platform.keirolabs.cloud",
                 },

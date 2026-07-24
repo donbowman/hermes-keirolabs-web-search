@@ -18,13 +18,13 @@ def reset_client():
 
 
 def test_is_available_without_key(monkeypatch):
-    monkeypatch.delenv("KEIROSLABS_API_KEY", raising=False)
+    monkeypatch.delenv("KEIROLABS_API_KEY", raising=False)
     provider = KeiroLabsWebSearchProvider()
     assert not provider.is_available()
 
 
 def test_is_available_with_key(monkeypatch):
-    monkeypatch.setenv("KEIROSLABS_API_KEY", "test-key")
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
     provider = KeiroLabsWebSearchProvider()
     assert provider.is_available()
 
@@ -36,7 +36,7 @@ def test_supports_capabilities():
 
 
 def test_search_unconfigured(monkeypatch):
-    monkeypatch.delenv("KEIROSLABS_API_KEY", raising=False)
+    monkeypatch.delenv("KEIROLABS_API_KEY", raising=False)
     provider = KeiroLabsWebSearchProvider()
     result = provider.search("test query")
     assert not result["success"]
@@ -44,7 +44,7 @@ def test_search_unconfigured(monkeypatch):
 
 
 def test_extract_unconfigured(monkeypatch):
-    monkeypatch.delenv("KEIROSLABS_API_KEY", raising=False)
+    monkeypatch.delenv("KEIROLABS_API_KEY", raising=False)
     provider = KeiroLabsWebSearchProvider()
     results = provider.extract(["https://example.com"])
     assert len(results) == 1
@@ -52,7 +52,7 @@ def test_extract_unconfigured(monkeypatch):
 
 
 def test_search_success(monkeypatch):
-    monkeypatch.setenv("KEIROSLABS_API_KEY", "test-key")
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
     provider = KeiroLabsWebSearchProvider()
 
     mock_response = MagicMock()
@@ -92,7 +92,7 @@ def test_search_success(monkeypatch):
 
 
 def test_extract_success(monkeypatch):
-    monkeypatch.setenv("KEIROSLABS_API_KEY", "test-key")
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
     provider = KeiroLabsWebSearchProvider()
 
     mock_response = MagicMock()
@@ -125,11 +125,11 @@ def test_setup_schema():
     schema = provider.get_setup_schema()
     assert schema["name"] == "KeiroLabs"
     assert len(schema["env_vars"]) == 1
-    assert schema["env_vars"][0]["key"] == "KEIROSLABS_API_KEY"
+    assert schema["env_vars"][0]["key"] == "KEIROLABS_API_KEY"
 
 
 def test_api_error_401(monkeypatch):
-    monkeypatch.setenv("KEIROSLABS_API_KEY", "test-key")
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
     provider = KeiroLabsWebSearchProvider()
 
     mock_response = MagicMock()
@@ -146,11 +146,11 @@ def test_api_error_401(monkeypatch):
         result = provider.search("test query")
 
         assert not result["success"]
-        assert "Invalid KEIROSLABS_API_KEY" in result["error"]
+        assert "Invalid KEIROLABS_API_KEY" in result["error"]
 
 
 def test_api_error_429_with_retry_after_seconds(monkeypatch):
-    monkeypatch.setenv("KEIROSLABS_API_KEY", "test-key")
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
     provider = KeiroLabsWebSearchProvider()
 
     mock_response = MagicMock()
@@ -173,7 +173,7 @@ def test_api_error_429_with_retry_after_seconds(monkeypatch):
 
 
 def test_api_error_429_with_retry_after_date(monkeypatch):
-    monkeypatch.setenv("KEIROSLABS_API_KEY", "test-key")
+    monkeypatch.setenv("KEIROLABS_API_KEY", "test-key")
     provider = KeiroLabsWebSearchProvider()
 
     mock_response = MagicMock()
